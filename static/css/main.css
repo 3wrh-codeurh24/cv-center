@@ -1,0 +1,30 @@
+.side-nav {
+    position: relative;
+    display: inline-block;
+    min-width: 100px;
+    width: 20vw;
+    border: 2px solid black;
+    
+}
+main,
+.side-nav
+{
+    display: inline-block;
+    height: 100vh;
+    overflow-y: scroll;
+}
+main {
+    position: relative;
+    
+    border: 2px solid red;
+    width: 75vw;
+    vertical-align: top;
+}
+.details {
+    background-color: cornflowerblue;
+}
+
+/*** Nav ***/
+nav ul li {
+    display: inline-block;
+}

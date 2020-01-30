@@ -1,0 +1,14 @@
+{
+    "name": "codeurh/search-cv",
+    "authors": [
+        {
+            "name": "codeurh24",
+            "email": "cci.corlouer@gmail.com"
+        }
+    ],
+    "require": {
+        "smalot/pdfparser": "^0.14.0",
+        "wrseward/pdf-parser": "^0.1.0",
+        "phpoffice/phpword": "^0.17.0"
+    }
+}
