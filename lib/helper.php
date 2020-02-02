@@ -1,4 +1,6 @@
 <?php
+
+use Cocur\Slugify\Slugify;
 /**
  * Retourne le nom du fichier sans l'extension
  * 
@@ -44,11 +46,56 @@ function fileList($regex='*.*') {
     if ($regex == '*.*' && isset($_SESSION['list-file-format'])) {
 
         $regex = '*.'.$_SESSION["list-file-format"];
+        $ListEntriesDir = glob(PATH_CV.$regex);
+    }else{
+        $ListEntriesDir = scandir(PATH_CV);
     }
     
 
-    $ListEntriesDir = glob(PATH_CV.$regex);
     $ListEntriesDir = array_map(function($v){ return basename($v); }, $ListEntriesDir);
 
     return array_splice($ListEntriesDir, 3, count($ListEntriesDir));
+}
+
+function checkValideFilename(){
+    $fileList = fileList();
+
+    foreach($fileList as $filename) {
+
+    //     if (strpos($filename, ' ') !== false){
+
+    //         $newName = str_replace(' ', '_', $filename);
+    //         $newName = mb_str_replace(' ', '_', $filename);
+    //         $newName = str_replace("'", '_', $newName);
+    //         $newName = str_replace("é", 'e', $newName);
+    //         $newName = mb_str_replace("(", '_', $newName);
+    //         $newName = mb_str_replace(")", '_', $newName);
+    //         $newName = str_replace(")", '_', $newName);
+    //         $newName = str_replace("(", '_', $newName);
+    //         $newName = str_replace(" ", '_', $newName);
+    //         $newName = str_replace("&", '_', $newName);
+    //         $newName = str_replace("+", '_', $newName);
+    //         $newName = str_replace("« ", '_', $newName);
+    //         $newName = str_replace(" »", '_', $newName);
+    //         $newName = str_replace("»", '_', $newName);
+    //         $newName = str_replace("«", '_', $newName);
+    //         $newName = str_replace("]", '_', $newName);
+    //         $newName = str_replace("[", '_', $newName);
+    //         rename(PATH_CV.$filename, PATH_CV.$newName);
+    //         echo "$filename > $newName<br />";
+    //     }
+
+        $slugify = new Slugify();
+        
+        $ext = getExtensionFile($filename);
+        if (strlen($ext) < 5) {
+            $newName = $slugify->slugify(getNameFile($filename)).'.'.$ext;
+        }else{
+            $newName = $slugify->slugify($filename);
+        }
+        
+        rename(PATH_CV.$filename, PATH_CV.$newName);
+        echo "$filename > $newName<br />";
+    }
+    
 }

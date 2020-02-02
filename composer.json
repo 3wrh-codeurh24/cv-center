@@ -9,6 +9,7 @@
     "require": {
         "smalot/pdfparser": "^0.14.0",
         "wrseward/pdf-parser": "^0.1.0",
-        "phpoffice/phpword": "^0.17.0"
+        "phpoffice/phpword": "^0.17.0",
+        "cocur/slugify": "^4.0"
     }
 }

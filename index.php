@@ -1,5 +1,6 @@
 <?php session_start();
 header('Content-Type: text/html; charset=utf-8');
+set_time_limit(3600);
 //sudo apt install antiword
 
 /* CONVERTIR une image representant le cv en texte au format pdf
@@ -36,24 +37,34 @@ $DefaultSource = "5de4fa2a0fd02894990424.pdf";
 (isset($_GET['read-file'])) ? $filename = $_GET['read-file'] : $filename = $DefaultSource ;
 
 
-// $fileList = fileList();
-// foreach($fileList as $filename) {
-//     try {
-//         if (!registerFile($filename)) {
-//             throw(new Exception('Echec: Enregistrement en base de donnée du CV a échoué'));
-//             exit;
-//         }
 
-//         if (!rename(PATH_CV.$filename, './cvsql/'.$filename)) {
-//             throw(new Exception('Echec: Déplacement du CV dans le dossier des CV enregistré a échoué'));
-//             exit;
-//         }
+checkValideFilename();
 
-//     } catch (Exception $e) {
-//         echo "Exception : {$e->getMessage()}\n";
-//     }
-// }
-// exit;
+$fileList = fileList();
+
+
+foreach($fileList as $filename) {
+    try {
+        if (!registerFile($filename)) {
+            if (!rename(PATH_CV.$filename, './cverror/'.$filename)){
+                echo "(try 0) Echec: Déplacement du CV dans le dossier des CVerror a échoué<br />\n";
+            }
+            echo "(try 1) Echec: Enregistrement en base de donnée du CV a échoué $filename<br />\n";
+            continue;
+        }
+        
+        if (!rename(PATH_CV.$filename, './cvsql/'.$filename)) {
+            echo "(try 2) Echec: Déplacement du CV dans le dossier des CVsql a échoué<br />\n";
+        }
+
+    } catch (Exception $e) {
+        echo "Exception : {$e->getMessage()}\n";
+        if (!rename(PATH_CV.$filename, './cverror/'.$filename)){
+            echo "(catch) Echec: Déplacement du CV dans le dossier des CVerror a échoué<br />\n";
+        }
+    }
+}
+exit('Programme fini');
 
 //5de4fb523101d326844577.docx good
 // 5de4fb4130777542159483.docx bad
@@ -133,22 +144,26 @@ $text = CV_getText($filename);
 
 
 function registerFile($filename) {
-    $dsn = 'mysql:dbname='.DB_NAME.';host='.DB_HOST;
+    $dsn = 'mysql:dbname='.DB_NAME.';host='.DB_HOST.';charset=UTF8';
     $dbh = new PDO($dsn, DB_USER, DB_PWD);
 
-    $parser = new PdfToTextParser('/usr/bin/pdftotext');
-    $parser->parse(PATH_CV.$filename);
+    // $parser = new PdfToTextParser('/usr/bin/pdftotext');
+    // $parser->parse(PATH_CV.$filename);
+    // $parser->text(),
+
+    $text = CV_getText($filename);
 
 
     $sth = $dbh->prepare("INSERT INTO `cv` 
-    (`id`, `md5`, `content`, `size`, `producer`, `keywords`, `date_last_access`)
+    (`id`, `original_filename`, `md5`, `content`, `size`, `producer`, `keywords`, `date_last_access`)
     VALUES
-    (NULL, ?,       ?,        ?,      ?,          ?,           ?)
+    (NULL, ?, ?,      ?,        ?,      ?,          ?,           ?)
     ");
 
     return $sth->execute([
-        md5_file(PATH_CV.$filename), 
-        $parser->text(), 
+        $filename,
+        md5_file(PATH_CV.$filename),
+        $text, 
         filesize(PATH_CV.$filename), 
         'PC DE FLO', 
         '', 

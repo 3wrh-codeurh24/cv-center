@@ -1,6 +1,5 @@
 <?php
 
-define("PATH_CV", "./cv/");
-define("PATH_TRASH", "./trash/");
+require 'config/path.php';
 
 require_once 'config/mysql.php';

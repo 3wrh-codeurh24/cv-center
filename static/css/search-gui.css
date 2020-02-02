@@ -1,0 +1,44 @@
+ #cv-list {
+    position: relative;
+    width: 19vw;
+    height: auto;
+    display: inline-block;
+    z-index: 1;
+    border-right: 1px solid cornflowerblue;
+    /* overflow-x: scroll; */
+    height: calc(100vh - 0px);
+    /* overflow-y: scroll; */
+}
+#cv-list-content {
+    overflow-y: scroll;
+    height: calc(100vh - 40px);
+}
+#cv-content {
+    position: relative;
+    width: calc(100% - 20vw);
+    display: inline-block;
+    vertical-align: top;
+    background-color: #BBB;
+    color: black;
+    overflow-y: scroll;
+    height: 100vh;
+} 
+#cv-content a{
+    color: white;
+} 
+
+.light{
+    background-color: #ebed64;;
+}
+
+#cv-content-tool-bar {
+    min-height: 10px;
+    padding: 3px 5px;
+    background-color: cornflowerblue;
+    text-align: right;
+    color: cornsilk;
+    zoom: 1.5;
+}
+#cv-content-tool-bar i {
+    cursor: pointer;
+}
