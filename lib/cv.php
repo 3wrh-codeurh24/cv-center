@@ -36,7 +36,39 @@ function CV_docToPdf($filename){
     return file_exists(PATH_CV.$newFilePdf) ? $newFilePdf : false;
 }
 
+function CV_getFileType($filename) {
 
+    $type = 'none';
+
+    if (file_exists(PATH_CV.$filename)) {
+        // echo 'mime_content_type: '.mime_content_type(PATH_CV.$filename).'<br />';
+        switch (mime_content_type(PATH_CV.$filename)) {
+            case 'application/pdf':
+                $type = 'pdf';
+                break;
+
+            case 'application/msword':
+                $type = 'doc';
+                break;
+            
+            case 'application/vnd.oasis.opendocument.text':
+                $type = 'odt';
+                break;
+            
+            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                $type = 'docx';
+                break;
+            
+            default:
+                $type = 'none';
+                break;
+        }
+    } else {
+        $type = 'Le fichier '.PATH_CV.$filename.' n\'existe pas';
+    }
+
+    return $type;
+}
 
 function CV_getText($filename) {
     if (file_exists(PATH_CV.$filename)) {

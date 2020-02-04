@@ -14,9 +14,9 @@ Télécharger seulement composer-setup.php pour ensuite l'installer de cette fa�
 sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 ```
 
-Ajouter les extensions php mbstring, zip et xml: 
+Ajouter les extensions php mbstring, zip, mysql et xml: 
 ```shell
-sudo apt-get install php7.4-mbstring php7.4-xml php7.4-zip
+sudo apt-get install php7.4-mbstring php7.4-zip php7.4-mysql php7.4-xml  
 ```
 
 installer les composants du dossier vendor 

@@ -57,35 +57,53 @@ function fileList($regex='*.*') {
     return array_splice($ListEntriesDir, 3, count($ListEntriesDir));
 }
 
-function checkValideFilename(){
+function deleteFilesVoids(){
     $fileList = fileList();
+    foreach ($fileList as $key => $filename) {
+        if(filesize(PATH_CV.$filename) === 0) {
+            if (unlink(PATH_CV.$filename)) echo "Fichier vide $filename supprimé<br />";
+        }
+    }
+}
+
+function removeDuplicateFiles() {
+    $fileList = fileList();
+    $md5Files = [];
+    foreach ($fileList as $key => $filename) {
+        $md5Value = md5_file(PATH_CV.$filename);
+
+        if(file_exists(PATH_CV.$filename)) {
+            if(!isset($md5Files[$md5Value])) {
+                $md5Files[$md5Value] = $filename;
+                echo "Enregistrement de $filename<br />";
+            } else {
+                
+                $dateFilename = filemtime(PATH_CV.$filename);            
+                
+                if(file_exists(PATH_CV.$md5Files[$md5Value])){
+                    $dateMd5File = filemtime(PATH_CV.$md5Files[$md5Value]);
+                    if (preg_match("/^[0-9a-f]{6,}/", $md5Files[$md5Value])) {
+                    
+                        if (unlink(PATH_CV.$md5Files[$md5Value])) echo $md5Files[$md5Value]." supprimé contre ".$filename.'<br />';
+                    }else if (preg_match("/^[0-9a-f]{6,}/", $filename)) {
+            
+                        if (unlink(PATH_CV.$filename)) echo $filename." supprimé contre ".$md5Files[$md5Value].'<br />';
+                    }else{
+                        if($filename === $md5Files[$md5Value]){
+                            if (unlink(PATH_CV.$md5Files[$md5Value])) echo $md5Files[$md5Value]." supprimé contre ".$filename;
+                        }
+                    }
+                }
+            }
+        }  
+    }
+}
+
+function checkValidFilename(){
+    $fileList = fileList();
+    $slugify = new Slugify();
 
     foreach($fileList as $filename) {
-
-    //     if (strpos($filename, ' ') !== false){
-
-    //         $newName = str_replace(' ', '_', $filename);
-    //         $newName = mb_str_replace(' ', '_', $filename);
-    //         $newName = str_replace("'", '_', $newName);
-    //         $newName = str_replace("é", 'e', $newName);
-    //         $newName = mb_str_replace("(", '_', $newName);
-    //         $newName = mb_str_replace(")", '_', $newName);
-    //         $newName = str_replace(")", '_', $newName);
-    //         $newName = str_replace("(", '_', $newName);
-    //         $newName = str_replace(" ", '_', $newName);
-    //         $newName = str_replace("&", '_', $newName);
-    //         $newName = str_replace("+", '_', $newName);
-    //         $newName = str_replace("« ", '_', $newName);
-    //         $newName = str_replace(" »", '_', $newName);
-    //         $newName = str_replace("»", '_', $newName);
-    //         $newName = str_replace("«", '_', $newName);
-    //         $newName = str_replace("]", '_', $newName);
-    //         $newName = str_replace("[", '_', $newName);
-    //         rename(PATH_CV.$filename, PATH_CV.$newName);
-    //         echo "$filename > $newName<br />";
-    //     }
-
-        $slugify = new Slugify();
         
         $ext = getExtensionFile($filename);
         if (strlen($ext) < 5) {

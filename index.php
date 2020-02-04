@@ -1,6 +1,10 @@
 <?php session_start();
 header('Content-Type: text/html; charset=utf-8');
 set_time_limit(3600);
+
+// astuce pour supprimer tout les fichier non caché: sudo find ./cv/ -type f -delete
+
+
 //sudo apt install antiword
 
 /* CONVERTIR une image representant le cv en texte au format pdf
@@ -38,11 +42,17 @@ $DefaultSource = "5de4fa2a0fd02894990424.pdf";
 
 
 
-checkValideFilename();
+// Supprime tous les fichiers contenant zéro octets
+deleteFilesVoids(); // 7405 - 7366
+
+// Supprime les fichiers ayant un contenu identique.
+// La suppression privilégie les noms de fichier humainement lisible.
+removeDuplicateFiles(); // 7366 - 4089
+
+// Renomme les fichiers sous forme de slug à cause des caractères difficilement lisibles.
+checkValidFilename();
 
 $fileList = fileList();
-
-
 foreach($fileList as $filename) {
     try {
         if (!registerFile($filename)) {
@@ -64,83 +74,9 @@ foreach($fileList as $filename) {
         }
     }
 }
+
 exit('Programme fini');
 
-//5de4fb523101d326844577.docx good
-// 5de4fb4130777542159483.docx bad
-// 2073_CV_CNM.doc
-
-
-//$_SESSION["newsession"]=$value;
-if (isset($_GET['list-file-format'])){
-    if ($_GET['list-file-format'] == 'pdf') $_SESSION["list-file-format"]='pdf';
-    if ($_GET['list-file-format'] == 'doc') $_SESSION["list-file-format"]='doc';
-    if ($_GET['list-file-format'] == 'docx') $_SESSION["list-file-format"]='docx';
-    if ($_GET['list-file-format'] == 'odt') $_SESSION["list-file-format"]='odt';
-    if ($_GET['list-file-format'] == 'all') $_SESSION["list-file-format"]='*';
-
-    header('Location: /');
-    exit;
-}
-
-
-
-$fileList = fileList();
-$text = CV_getText($filename);
-
-
-
-// if ( isset($text) && strlen($text) < 300) {
-//     $text = OCR_docToPdf($filename);
-//     echo 'Le texte contient '.strlen($text).' caracteres';
-// }else{
-//     $text = !isset($text) ? 'texte vide' : 'texte trop petit';
-// }
-?>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>3WRH - Data Center - search CV</title>
-        <link rel="stylesheet" href="static/css/main.css">
-        <meta charset="UTF-8">
-    </head>
-    <body>
-        <nav>
-            <ul>
-                <li><a href="?list-file-format=all">All</a></li>
-                <li><a href="?list-file-format=pdf">PDF</a></li>
-                <li><a href="?list-file-format=doc">DOC</a></li>
-                <li><a href="?list-file-format=docx">DOCX</a></li>
-                <li><a href="?list-file-format=odt">ODT</a></li>
-            </ul>
-        </nav>
-        <div class="side-nav">
-            <?php
-            foreach($fileList as $file){
-                ?>
-                <div>
-                    <a href="?read-file=<?= $file ?>"><?= $file ?></a>
-                </div>
-                <?php
-            }
-            ?>
-        </div>
-        <main >
-            <!-- <div class="details"><?= PDF_getDetails($filename) ?></div> -->
-            <div class="details"><?=  null //implode('; ',) ?></div>
-            <div class="content">
-                <pre>
-                    <?= $text ?>
-                </pre>
-
-            </div>
-        </main>
-    </body>
-    </html>
-<?php
 
 
 function registerFile($filename) {
@@ -155,9 +91,9 @@ function registerFile($filename) {
 
 
     $sth = $dbh->prepare("INSERT INTO `cv` 
-    (`id`, `original_filename`, `md5`, `content`, `size`, `producer`, `keywords`, `date_last_access`)
+    (`id`, `original_filename`, `md5_file`, `content`, `size`, `file_type`, `date_last_access`)
     VALUES
-    (NULL, ?, ?,      ?,        ?,      ?,          ?,           ?)
+    (NULL,  ?,                   ?,          ?,         ?,      ?,            ?)
     ");
 
     return $sth->execute([
@@ -165,8 +101,7 @@ function registerFile($filename) {
         md5_file(PATH_CV.$filename),
         $text, 
         filesize(PATH_CV.$filename), 
-        'PC DE FLO', 
-        '', 
+        CV_getFileType($filename), 
         ((new DateTime())->format('Y-m-d H:i:s'))
     ]);
 
