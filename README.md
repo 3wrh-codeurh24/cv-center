@@ -1,6 +1,6 @@
 # CV-CENTER
 
-> Programme version 1.0.0 - version php 7.4 - Ubuntu 18.04 - Navigateur Chrome.
+> Programme version 1.1.0 - version php 7.4 - Ubuntu 18.04 - Navigateur Chrome.
 
 ### Installation
 Installation des dépendances shell: 
