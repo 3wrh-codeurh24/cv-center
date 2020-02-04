@@ -29,26 +29,22 @@ Dans le dossier du projet ajouter le fichier config/mysql.php et configurer le. 
 Creer la table
 
 ```sql
-CREATE TABLE cv 
-( id int(11) 
-    NOT NULL, 
-  original_filename varchar(255) CHARACTER SET latin1 
+CREATE TABLE `cv` (
+  `id` int(11) 
     NOT NULL,
-  md5 varchar(255) CHARACTER SET latin1 
+  `original_filename` varchar(255) COLLATE utf8mb4_unicode_ci 
+    NOT NULL,
+  `md5_file` varchar(255) COLLATE utf8mb4_unicode_ci 
     NOT NULL COMMENT 'signature numérique pour doublons',
-  content text CHARACTER SET latin1 
-    NOT NULL COMMENT 'texte du cv',  
-  size int(11) 
-    NOT NULL COMMENT 'taille en octet',  
-  producer varchar(255) CHARACTER SET latin1 
-    NOT NULL COMMENT 'logiciel qui produit le document',  
-  keywords varchar(255) CHARACTER SET latin1 
-    NOT NULL COMMENT 'match, mot clé',  
-  date_last_access datetime 
-    NOT NULL COMMENT 'dernier acces de consultation' 
-) 
-    
-ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `content` text COLLATE utf8mb4_unicode_ci 
+    NOT NULL COMMENT 'texte du cv',
+  `size` int(11) 
+    NOT NULL COMMENT 'taille en octet',
+  `file_type` varchar(4) COLLATE utf8mb4_unicode_ci 
+    NOT NULL COMMENT 'extension prévu pour lire ce fichier',
+  `date_last_access` datetime 
+    NOT NULL COMMENT 'dernier acces de consultation'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
 Démarrer le petit serveur php: 
