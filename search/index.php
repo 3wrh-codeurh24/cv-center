@@ -27,7 +27,7 @@ if (isset($_GET['advanced_search'])) {
     
 
 } else {
-    $word = "developpeur";
+    $word = "";
 
     if (isset($_GET['search'])) {
         $word = $_GET['search'];
