@@ -33,6 +33,40 @@ use \Wrseward\PdfParser\Pdf\PdfToTextParser;
 use Symfony\Component\Process\Process;
 
 
+
+if (isset($_GET['execute'])) {
+
+
+    if($_GET['execute'] == 1)  {
+        $cmd ='php cvToSql.php >/dev/null 2>&1 & echo $!';
+        $pid = shell_exec($cmd);
+        $_SESSION['cv-center-pid-execute']  = $pid ;
+    }else{
+        shell_exec("kill -9 ".$_SESSION['cv-center-pid-execute']);
+    }
+
+    exit;
+}
+
+if (isset($_GET['info'])) {
+
+    $cv = count(fileList());
+    $cvsql = count(scandir(__DIR__.'/cvsql'));
+    $cverror = count(scandir(__DIR__.'/cverror'));
+    $total = $cv + $cvsql;
+
+
+    echo json_encode([
+        'cv' => $cv,
+        'cvsql' => $cvsql,
+        'total' => $total,
+        'ratio' => $cvsql / $total,
+        'percent' => ((round(($cvsql / $total), 2)) * 100),
+        'cverror' => $cverror
+    ]);
+    exit;
+}
+
 // ./cv/5de4fa2a0fd02894990424.pdf
 
 $DefaultSource = "5de4fa2a0fd02894990424.pdf";
@@ -52,60 +86,89 @@ removeDuplicateFiles(); // 7366 - 4089
 // Renomme les fichiers sous forme de slug à cause des caractères difficilement lisibles.
 checkValidFilename();
 
-$fileList = fileList();
-foreach($fileList as $filename) {
-    try {
-        if (!registerFile($filename)) {
-            if (!rename(PATH_CV.$filename, './cverror/'.$filename)){
-                echo "(try 0) Echec: Déplacement du CV dans le dossier des CVerror a échoué<br />\n";
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>CV CENTER </title>
+</head>
+<body>
+    <button id="execute">Executer le script</button>
+    <button id="execute-stop">Stopper le script</button>
+    <progress id="progress-bar" max="100" value="70"> 70% </progress>
+    <div class="infos">
+        <div><span class="info-cv">0</span> cv</div>
+        <div><span class="info-cvsql">0</span> cvsql</div>
+        <div><span class="info-total">0</span> total</div>
+        <div><span class="info-percent">0</span>%</div>
+    </div>
+    <div>
+        <form action="/search" method="get">
+            <button type="submit">Rechercher</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <script>
+        $(function(){
+
+            function infos(){
+                $.ajax({
+                    method: 'GET',
+                    dataType: "json",
+                    url: "/?info=1",
+                }).done(function(data){
+                    console.log('test ', data);
+                    $('.info-cv').text(data.cv)
+                    $('.info-cvsql').text(data.cvsql)
+                    $('.info-total').text(data.total)
+                    $('.info-percent').text(data.percent)
+                    $('#progress-bar').attr('max', data.total);
+                    $('#progress-bar').attr('value', data.cvsql);
+                    $('#progress-bar').text(data.percent+'%');
+
+                }).fail(function(data) {
+                    console.log( "error update", data );
+                });
             }
-            echo "(try 1) Echec: Enregistrement en base de donnée du CV a échoué $filename<br />\n";
-            continue;
-        }
-        
-        if (!rename(PATH_CV.$filename, './cvsql/'.$filename)) {
-            echo "(try 2) Echec: Déplacement du CV dans le dossier des CVsql a échoué<br />\n";
-        }
-
-    } catch (Exception $e) {
-        echo "Exception : {$e->getMessage()}\n";
-        if (!rename(PATH_CV.$filename, './cverror/'.$filename)){
-            echo "(catch) Echec: Déplacement du CV dans le dossier des CVerror a échoué<br />\n";
-        }
-    }
-}
-
-exit('Programme fini');
 
 
+            $('#execute').click(async function(){                
+                
+                window.infoLoop = setInterval(() => {
+                    infos();
+                }, 1000);
+                
+                let response = await fetch('/?execute=1');
+                let data = await response.json();
+                console.log(data)
+            })
+            
+            $('#execute-stop').click(async function(){ 
+                clearInterval(window.infoLoop);
+                let response = await fetch('/?execute=0');
+                let data = await response.json();
+                console.log(data)
+            })
+            infos();
 
-function registerFile($filename) {
-    $dsn = 'mysql:dbname='.DB_NAME.';host='.DB_HOST.';charset=UTF8';
-    $dbh = new PDO($dsn, DB_USER, DB_PWD);
-
-    // $parser = new PdfToTextParser('/usr/bin/pdftotext');
-    // $parser->parse(PATH_CV.$filename);
-    // $parser->text(),
-
-    $text = CV_getText($filename);
+        });
+    </script>
+</body>
+</html>
+<?php
 
 
-    $sth = $dbh->prepare("INSERT INTO `cv` 
-    (`id`, `original_filename`, `md5_file`, `content`, `size`, `file_type`, `date_last_access`)
-    VALUES
-    (NULL,  ?,                   ?,          ?,         ?,      ?,            ?)
-    ");
 
-    return $sth->execute([
-        $filename,
-        md5_file(PATH_CV.$filename),
-        $text, 
-        filesize(PATH_CV.$filename), 
-        CV_getFileType($filename), 
-        ((new DateTime())->format('Y-m-d H:i:s'))
-    ]);
 
-}
+
+
+
+
+
 
 
 

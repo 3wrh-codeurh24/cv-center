@@ -61,7 +61,7 @@ function deleteFilesVoids(){
     $fileList = fileList();
     foreach ($fileList as $key => $filename) {
         if(filesize(PATH_CV.$filename) === 0) {
-            if (unlink(PATH_CV.$filename)) echo "Fichier vide $filename supprimé<br />";
+            if (unlink(PATH_CV.$filename)) {} // echo "Fichier vide $filename supprimé<br />";
         }
     }
 }
@@ -75,7 +75,7 @@ function removeDuplicateFiles() {
         if(file_exists(PATH_CV.$filename)) {
             if(!isset($md5Files[$md5Value])) {
                 $md5Files[$md5Value] = $filename;
-                echo "Enregistrement de $filename<br />";
+                //echo "Enregistrement de $filename<br />";
             } else {
                 
                 $dateFilename = filemtime(PATH_CV.$filename);            
@@ -84,13 +84,13 @@ function removeDuplicateFiles() {
                     $dateMd5File = filemtime(PATH_CV.$md5Files[$md5Value]);
                     if (preg_match("/^[0-9a-f]{6,}/", $md5Files[$md5Value])) {
                     
-                        if (unlink(PATH_CV.$md5Files[$md5Value])) echo $md5Files[$md5Value]." supprimé contre ".$filename.'<br />';
+                        if (unlink(PATH_CV.$md5Files[$md5Value])) {} // echo $md5Files[$md5Value]." supprimé contre ".$filename.'<br />';
                     }else if (preg_match("/^[0-9a-f]{6,}/", $filename)) {
             
-                        if (unlink(PATH_CV.$filename)) echo $filename." supprimé contre ".$md5Files[$md5Value].'<br />';
+                        if (unlink(PATH_CV.$filename)) {} // echo $filename." supprimé contre ".$md5Files[$md5Value].'<br />';
                     }else{
                         if($filename === $md5Files[$md5Value]){
-                            if (unlink(PATH_CV.$md5Files[$md5Value])) echo $md5Files[$md5Value]." supprimé contre ".$filename;
+                            if (unlink(PATH_CV.$md5Files[$md5Value])) {} // echo $md5Files[$md5Value]." supprimé contre ".$filename;
                         }
                     }
                 }
@@ -113,7 +113,7 @@ function checkValidFilename(){
         }
         
         rename(PATH_CV.$filename, PATH_CV.$newName);
-        echo "$filename > $newName<br />";
+        //echo "$filename > $newName<br />";
     }
     
 }
