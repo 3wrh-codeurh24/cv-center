@@ -1,0 +1,43 @@
+.tools-search-bar .nav-link-history-search {
+    margin-left: 10px;
+}
+
+.tools-search-bar .nav-link-history-search:hover ul{
+    display: block;
+    margin-left: 58px;
+    margin-top: -30px;
+    padding-top: 8px;
+}
+
+.tools-search-bar .nav-link-history-search ul{
+    background-color: #656469;
+    padding: 20px 20px 10px 20px;
+    margin: 0;
+    overflow: hidden;
+    width: 270px;
+    display: none;
+}
+
+
+
+
+
+
+.tools-search-bar .nav-link-history-search ul li i{
+    color: #862525;
+    vertical-align: middle;
+}
+
+.tools-search-bar .nav-link-history-search li{
+    list-style-type: none;
+    padding: -20px;
+    margin: 0;
+    overflow: hidden;
+    width: 600px;
+    height: 25px;
+}
+
+.tools-search-bar .nav-link-history-search ul ol.title {
+    font-size: large;
+    text-align:center
+}

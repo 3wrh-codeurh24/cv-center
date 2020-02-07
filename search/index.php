@@ -81,6 +81,7 @@ if (isset($_GET['filename'])) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Search CV - CV CENTER</title>
+    <!-- Certains fichiers css sont ajoutés grâce aux fichiers event -->
     <link rel="stylesheet" href="/static/css/page/search/infos-start.css" />
     <link rel="stylesheet" href="/static/css/page/search/search-bar/search-bar.css" />
     <link rel="stylesheet" href="/static/css/page/search/search-gui.css" />
@@ -93,7 +94,15 @@ if (isset($_GET['filename'])) {
                 <div class="tools-search-bar">
                     <a href="#" class="nav-link-favories-cv">
                         <i class="material-icons">star</i>
-                        <ul></ul>
+                        <ul><ol class="title">Mes Favoris</ol></ul>
+                    </a>
+                    <a href="#" class="nav-link-history-cv">
+                        <i class="material-icons">list</i>
+                        <ul><ol class="title">Mes derniers accès</ol></ul>
+                    </a>
+                    <a href="#" class="nav-link-history-search">
+                        <i class="material-icons">list</i>
+                        <ul><ol class="title">Mes dernieres recherches</ol></ul>
                     </a>
                 </div>                
                 <div style="text-align:right;"><?= count($list) ?> Résultats</div>
@@ -148,14 +157,18 @@ if (isset($_GET['filename'])) {
                 } else {
                     $actual_link = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
                     $urlQuery = parse_url($actual_link, PHP_URL_QUERY);
-                    $url = "http://$_SERVER[HTTP_HOST]/search?$urlQuery&filename=$row[original_filename]";
+                    $url = "http://$_SERVER[HTTP_HOST]/search?filename=$row[original_filename]";
                 }
 
 
 
                 ?>
                 <div>
-                    <a href="<?= $url ?>"><?= $row['original_filename'] ?></a>
+                    <?php if (isset($_GET['filename']) && $row['original_filename'] == $_GET['filename']) { ?>
+                        <a href="<?= $url ?>" class="light"><?= $row['original_filename'] ?></a>
+                    <?php } else { ?>
+                        <a href="<?= $url ?>"><?= $row['original_filename'] ?></a>
+                    <?php } ?>
                 </div>
                 <?php
             }

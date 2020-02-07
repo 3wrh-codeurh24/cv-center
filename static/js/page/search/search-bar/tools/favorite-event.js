@@ -2,25 +2,12 @@ export default function favoriteEvent(){
     
     $('head').append('<link rel="stylesheet" href="/static/css/page/search/search-bar/tools/favorite.css" type="text/css" />');
 
-
-    let session = {};
-    if (localStorage.getItem('cv-center') === null) {
-        console.log('nouveau utilisateur')
-        session = {
-            'userId': ((new Date()).getMilliseconds() + Math.floor(Math.random() * Math.floor(999999))),
-            'favorite': []
-        }
-        localStorage.setItem('cv-center', JSON.stringify(session));
-    } else {
-        session = JSON.parse(localStorage.getItem('cv-center'));
-        console.log('utilisateur ', session.userId)
-        console.log('session ', session)
-    }
+    let session = session_start();
 
     refreshFavorite(session);
 
 
-    $('body').on('click', '.btn-del-item-history',function(){
+    $('body').on('click', '.btn-del-item-favorite',function(){
         let id = $(this).data('index');
         if(session.favorite) {
             session.favorite.splice(id,1);
@@ -84,7 +71,7 @@ export default function favoriteEvent(){
             }
     
             $('.nav-link-favories-cv ul')
-                .append(`<li><i class="btn-del-item-history material-icons" data-index="${id}">delete</i><a href="?${searchParam}filename=${session.favorite[id].filename}">${session.favorite[id].filename}</a></li>`)
+                .append(`<li><i class="btn-del-item-favorite material-icons" data-index="${id}">close</i><a href="?${searchParam}filename=${session.favorite[id].filename}">${session.favorite[id].filename}</a></li>`)
 
         }
     }

@@ -4,11 +4,12 @@
     color: rgb(245, 228, 78);
 }
 .tools-search-bar .nav-link-favories-cv ul li i{
-    color: red;
+    color: #862525;
     vertical-align: middle;
 }
 .tools-search-bar .nav-link-favories-cv:hover ul{
     display: block;
+    padding-top: 8px;
 }
 
 .tools-search-bar .nav-link-favories-cv {
@@ -17,7 +18,7 @@
 }
 
 .tools-search-bar .nav-link-favories-cv ul{
-    background-color: black;
+    background-color: #656469;
     padding: 20px 20px 10px 20px;
     margin: 0;
     overflow: hidden;
@@ -31,4 +32,9 @@
     overflow: hidden;
     width: 600px;
     height: 25px;
+}
+
+.tools-search-bar .nav-link-favories-cv ul ol.title {
+    font-size: large;
+    text-align: center;
 }

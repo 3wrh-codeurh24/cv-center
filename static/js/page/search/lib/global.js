@@ -18,3 +18,50 @@ export default function getParamUrlSearch(){
     }
     return searchParam
 }
+
+export function frenchDateTimeString() {
+    let datePart1 = (new Intl.DateTimeFormat('fr-FR', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour12: false,
+        formatMatcher: 'basic'
+    }).format(Date.now()))
+
+    let datePart2 = (new Intl.DateTimeFormat('fr-FR', {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: false,
+        formatMatcher: 'basic'
+    }).format(Date.now()))
+    return datePart1+' '+datePart2
+}
+
+export function session_start(){
+    let session = {};
+    if (localStorage.getItem('cv-center') === null) {
+        // console.log('nouveau utilisateur')
+        session = {
+            'userId': ((new Date()).getMilliseconds() + Math.floor(Math.random() * Math.floor(999999))),
+            'version': window.system.version,
+            'favorite': [],
+            'history': {
+                'access': [],
+                'search': []
+            }
+        }
+        localStorage.setItem('cv-center', JSON.stringify(session));
+    } else {
+        session = JSON.parse(localStorage.getItem('cv-center'));
+        // console.log('utilisateur ', session.userId)
+        // console.log('session ', session)
+    }
+    return session;
+}
+
+export function session_start_reset(session){
+    if (session.version !== window.system.version && window.system.resetLocalStorage) {
+        localStorage.removeItem('cv-center');
+    }
+}
