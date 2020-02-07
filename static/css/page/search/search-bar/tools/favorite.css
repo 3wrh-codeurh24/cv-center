@@ -1,0 +1,34 @@
+
+.tools-search-bar .nav-link-favories-cv > i{
+    position: absolute;
+    color: rgb(245, 228, 78);
+}
+.tools-search-bar .nav-link-favories-cv ul li i{
+    color: red;
+    vertical-align: middle;
+}
+.tools-search-bar .nav-link-favories-cv:hover ul{
+    display: block;
+}
+
+.tools-search-bar .nav-link-favories-cv {
+    background-color: black;
+    
+}
+
+.tools-search-bar .nav-link-favories-cv ul{
+    background-color: black;
+    padding: 20px 20px 10px 20px;
+    margin: 0;
+    overflow: hidden;
+    width: 270px;
+    display: none;
+}
+.tools-search-bar .nav-link-favories-cv ul li{
+    list-style-type: none;
+    padding: -20px;
+    margin: 0;
+    overflow: hidden;
+    width: 600px;
+    height: 25px;
+}

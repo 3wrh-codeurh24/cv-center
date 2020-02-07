@@ -6,12 +6,12 @@
     z-index: 1;
     border-right: 1px solid cornflowerblue;
     /* overflow-x: scroll; */
-    height: calc(100vh - 0px);
+    height: calc(100vh - 20px);
     /* overflow-y: scroll; */
 }
 #cv-list-content {
     overflow-y: scroll;
-    height: calc(100vh - 40px);
+    height: calc(100vh - 115px);
 }
 #cv-content {
     position: relative;
@@ -21,7 +21,7 @@
     background-color: #BBB;
     color: black;
     overflow-y: scroll;
-    height: 100vh;
+    height: 98vh;
 } 
 #cv-content a{
     color: white;
@@ -41,4 +41,14 @@
 }
 #cv-content-tool-bar i {
     cursor: pointer;
+}
+
+
+.tools-search-bar {
+    position: absolute;
+    z-index: 15;
+}
+
+a {
+    text-decoration: none;
 }

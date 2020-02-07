@@ -7,43 +7,53 @@ require_once '../config/mysql.php';
 $dsn = 'mysql:dbname='.DB_NAME.';host='.DB_HOST.';charset=UTF8';
 $dbh = new PDO($dsn, DB_USER, DB_PWD);
 
-if (isset($_GET['advanced_search'])) {
-
-    $qValues = $_GET['advanced_search']['text'];
-    $qOperator = $_GET['advanced_search']['select'];
-
+// se if gere la partie recherche a partir de l'url
+if (isset($_GET['search'])) {
+    // génération d'une chaine sql precisant les 'where' dans la requete sql 
+    // qui execute une recherche par la colonne content
     $sqlWhere = '';
-    $sqlDebug = '';
-    foreach ($qValues as $key => $value) {
-        $qValues[$key] = '%'.$qValues[$key].'%';
-        $_value = $qValues[$key];
-        $_operator = $qOperator[$key] ?? '';
-        $sqlWhere .= "`content` LIKE ? $_operator ";
-        $sqlDebug .= "`content` LIKE '$_value' $_operator ";
-    }
-    echo "$sqlDebug<br />";
-    $sth = $dbh->prepare("SELECT id, original_filename, date_last_access FROM `cv` WHERE $sqlWhere ORDER BY `id` DESC");
-    $sth->execute($qValues);
-    
+    // Toutes le valeurs utiles pour PDO execute
+    $words = [];
 
-} else {
-    $word = "";
-
-    if (isset($_GET['search'])) {
-        $word = $_GET['search'];
+    // copie chaque mot entrée de chaque input vers le tableau words
+    foreach ($_GET['search'] as $key => $search){
+        foreach (explode(" ", $search) as $key => $value) $words[] = "%$value%";
     }
-    
-    $sth = $dbh->prepare('SELECT id, original_filename, date_last_access FROM `cv` WHERE `content` LIKE ? ORDER BY `id` DESC');
-    $sth->execute(["%$word%"]);
+
+    // génération de la chaine where sql.
+    // premiere boucle pour tous les input representant un or
+    foreach ($_GET['search'] as $key => $search){           
+        // deuxieme boucle, dans un input les mots séparer par des espaces sont des and
+        foreach (explode(" ", $search) as $key2 => $value) {
+            if(isset(explode(" ", $search)[$key2+1])) {
+                $sqlWhere .= "`content` LIKE ? and ";
+            }else{
+                $sqlWhere .= "`content` LIKE ? ";
+            }
+        }
+
+        if(isset($_GET['search'][$key+1])) $sqlWhere .= " or ";
+    }
+
+
+
+
+    $sql = "SELECT id, original_filename, date_last_access FROM `cv` WHERE $sqlWhere ORDER BY `id` DESC";
+    $sth = $dbh->prepare($sql);
+    $sth->execute($words);
+
+}else{
+    $sth = $dbh->prepare('SELECT id, original_filename, date_last_access FROM `cv`');
+    $sth->execute();
 }
-// exit;
-
-
-
-
-
 $list = $sth->fetchAll(PDO::FETCH_ASSOC);
 
+
+
+
+
+
+// ce if permet d'afficher le contenu d'un cv en texte brut
 if (isset($_GET['filename'])) {
 
     $sth = $dbh->prepare('SELECT content FROM `cv` WHERE `original_filename` LIKE ? ');
@@ -52,11 +62,14 @@ if (isset($_GET['filename'])) {
     $row = $sth->fetch(PDO::FETCH_ASSOC);
 
     $content = $row['content'];
-    // $content = mb_convert_encoding($row['content'], "UTF-8", mb_detect_encoding($row['content'], "UTF-8, ISO-8859-1, ISO-8859-15", true));
-    // $content = mb_convert_encoding($row['content'], "ISO-8859-1", mb_detect_encoding($row['content'], "UTF-8, ISO-8859-1, ISO-8859-15", true));
     
     if (isset($_GET['search'])) {
-        $content = str_ireplace($word, "<span class=\"light\">$word</span>", $content);
+        foreach ($_GET['search'] as $key => $search) {
+            $words = explode(" ", $search);
+            foreach ($words as $key => $word) {
+                $content = str_ireplace($word, "<span class=\"light\">$word</span>", $content);
+            }
+        }
     }
 }
 
@@ -67,42 +80,51 @@ if (isset($_GET['filename'])) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Search CV - CV CENTER</title>
-    <link rel="stylesheet" href="/static/css/search-bar.css" />
-    <link rel="stylesheet" href="/static/css/search-gui.css" />
+    <link rel="stylesheet" href="/static/css/page/search/infos-start.css" />
+    <link rel="stylesheet" href="/static/css/page/search/search-bar/search-bar.css" />
+    <link rel="stylesheet" href="/static/css/page/search/search-gui.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/3.0.1/iconfont/material-icons.min.css" />
 </head>
 <body>
     <div id="cv-list">
         <div id="search-bar">
             <form>
-                <input type="text" name="search" value="<?= $_GET['search'] ?? '' ?>">
-                <input type="submit" value="Rechercher">
+                <div class="tools-search-bar">
+                    <a href="#" class="nav-link-favories-cv">
+                        <i class="material-icons">star</i>
+                        <ul></ul>
+                    </a>
+                </div>                
+                <div style="text-align:right;"><?= count($list) ?> Résultats</div>
+                <div class="inputs-form" style="margin:auto;width:234px;padding: 10px 0">
+                    <?php
+                    if (isset($_GET['search'])) {
+                        foreach ($_GET['search'] as $key => $value) {
+                            if($key == 0) {
+                                ?>
+                                    <input type="text" name="search[]" value="<?= $value ?? '' ?>" />
+                                    <input type="button" value="+" class="btn-form-add-value">
+                                <?php
+                            }else{
+                                ?>
+                                    <input type="text" name="search[]" value="<?= $value ?? '' ?>" class="row-form-<?= $key ?>" />
+                                    <input type="button" value="+" class="btn-form-add-value row-form-<?= $key ?>">
+                                    <input type="button" value="-" class="btn-form-del-value" data-index="<?= $key ?>">
+                                <?php
+                            }
+                        }
+                    } else {
+                    ?>
+                    <input type="text" name="search[]" value="<?= $_GET['search'] ?? '' ?>" /><input type="button" value="+" class="btn-form-add-value">
+                    <?php
+                    }
+                    ?>
+                </div>
+                <div style="text-align:center;">
+                    <input type="submit" value="Rechercher" />
+                </div>
             </form>
-            <div class="info-search-result">
-                <?= count($list) ?> Résultats - <span><a href="#" class="btn-advanced-search">Recherche avancé</a></span>
-            </div>
-            <div id="search-bar-advanced">
-                <form>
-                    <div class="inputs-form">
-                        <div>
-                            <input type="text" name="advanced_search[text][]">
-                        </div>
-                        <div>
-                            <select name="advanced_search[select][]">
-                                <option value="and">Et</option>
-                                <option value="or">Ou</option>
-                            </select>
-                            <input type="text" name="advanced_search[text][]">
-                            <input type="button" value="+" class="btn-form-add-value">
-                        </div>
-                    </div>
-                    <div>
-                        <input type="submit" value="Rechercher">
-                    </div>
-                </form>
-            </div>
         </div>
         <div id="cv-list-content">
             <?php 
@@ -110,8 +132,19 @@ if (isset($_GET['filename'])) {
             foreach ($list as $row) {
 
                 if (isset($_GET['search'])) {
+                    $qSearch = '';
+
+                    foreach ($_GET['search'] as $key => $value) {
+                        if(isset($_GET['search'][$key+1])){
+                            $qSearch .= "search%5B%5D=$value&";
+                        }else{
+                            $qSearch .= "search%5B%5D=$value";
+                        }
+                        
+                    }
+                    
                 
-                    $url = "http://$_SERVER[HTTP_HOST]/search?search=$_GET[search]&filename=$row[original_filename]";
+                    $url = "http://$_SERVER[HTTP_HOST]/search?$qSearch&filename=$row[original_filename]";
                 } else {
                     $actual_link = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
                     $urlQuery = parse_url($actual_link, PHP_URL_QUERY);
@@ -135,16 +168,20 @@ if (isset($_GET['filename'])) {
         if (isset($content)) {
         ?> 
             <div id="cv-content-tool-bar">
-                <a href="<?= "http://$_SERVER[HTTP_HOST]/search/download.php?filename=$_GET[filename]" ?>">
-                    <i class="material-icons">cloud_download</i>
+                <a href="<?= "http://$_SERVER[HTTP_HOST]/search/download.php?filename=$_GET[filename]" ?>"><i class="material-icons">cloud_download</i></a>
+                <a href="#" class="btn-favories-add-cv" data-filename="<?= "$_GET[filename]" ?>">
+                    <i class="material-icons">star</i>
                 </a>
             </div>
             <pre><?= $content ?></pre>
         <?php
-        } 
+        } else {
+            include './info-start/infos-start.php';
+        }
         ?>
     </div>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="/static/js/advanced-search.js"></script>
+    <script src="/static/js/search-bar/lib/global.js" type="module"></script>
+    <script src="/static/js/page/search/app.js" type="module"></script> 
 </body>
 </html>

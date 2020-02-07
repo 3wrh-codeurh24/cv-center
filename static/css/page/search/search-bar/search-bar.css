@@ -29,4 +29,8 @@
     transition: opacity 0.5s;
 }
 
+.inputs-form input[type=text] {
+    margin-bottom:2px;
+}
+
 

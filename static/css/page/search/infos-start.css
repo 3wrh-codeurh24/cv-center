@@ -1,0 +1,17 @@
+#infos-start {
+    background-color: rgb(114, 114, 114);
+    min-height:100vh;
+    padding-left: 1rem;
+}
+
+#infos-start img {
+    box-shadow: 0 0 10px black;
+}
+
+#infos-start .search-symfony-angular:nth-child(1n) {
+    vertical-align: top;
+}
+
+#infos-start p {
+    margin-bottom: 5px;
+}
