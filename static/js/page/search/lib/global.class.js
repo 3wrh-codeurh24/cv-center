@@ -73,6 +73,7 @@ export default class Global {
     session_start_reset(session){
         if (session.version !== this.system.version && this.system.resetLocalStorage) {
             localStorage.removeItem('cv-center');
+            document.location.reload();
         }
     }
 }
